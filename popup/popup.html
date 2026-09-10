@@ -1,0 +1,13 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{width:250px;font:13px system-ui;padding:12px}label{display:block;margin:8px 0}input[type=range]{width:100%}</style></head>
+<body>
+<h3>Chess Move Advisor</h3>
+<label><input type="checkbox" id="enCC"> Enable on chess.com</label>
+<label><input type="checkbox" id="enLi"> Enable on lichess.org</label>
+<label>Depth: <b id="dval">12</b><input type="range" id="depth" min="5" max="25" value="12"></label>
+<label>Max think: <b id="tval">3s</b><input type="range" id="mtime" min="1" max="10" value="3"></label>
+<label>Lines: <b id="mval">1</b><input type="range" id="mpv" min="1" max="3" value="1"></label>
+<label><input type="checkbox" id="showEval"> Show evaluation</label>
+<div id="last" style="margin-top:8px;color:#555"></div>
+<script src="popup.js"></script>
+</body></html>

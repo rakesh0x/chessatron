@@ -1,0 +1,10 @@
+# Vendored engine binaries (run sh engine/download-stockfish.sh to fetch)
+engine/stockfish.js
+engine/stockfish.wasm
+engine/*.nnue
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/

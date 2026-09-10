@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Chess Move Advisor (Local Stockfish)",
+  "version": "1.1.0",
+  "description": "Reads live chess.com / lichess.org games from the DOM and suggests moves with a locally-run Stockfish WASM engine.",
+  "permissions": ["activeTab", "scripting", "storage", "offscreen"],
+  "host_permissions": ["*://*.chess.com/*", "*://*.lichess.org/*"],
+  "background": { "service_worker": "background/service-worker.js" },
+  "action": { "default_popup": "popup/popup.html", "default_title": "Chess Move Advisor" },
+  "content_scripts": [
+    {
+      "matches": ["*://*.chess.com/*", "*://*.lichess.org/*"],
+      "js": ["lib/chess.js", "content-scripts/common.js", "content-scripts/chesscom-adapter.js", "content-scripts/lichess-adapter.js", "engine/engine-worker-client.js", "content-scripts/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    { "resources": ["engine/*"], "matches": ["*://*.chess.com/*", "*://*.lichess.org/*"] }
+  ]
+}
