@@ -1,138 +1,145 @@
-# ♞ Chess Move Advisor
+<p align="center">
+  <img src="assets/logo.svg" width="160" alt="Chessatron logo">
+</p>
 
-A Chrome/Edge (Manifest V3) extension that reads live games on **chess.com** and **lichess.org** straight from the page DOM and suggests the next move using **Stockfish 18 running locally in WebAssembly** — no accounts, no cloud engine, no network calls for analysis.
+<h1 align="center">Chessatron</h1>
 
-![Manifest V3](https://img.shields.io/badge/Manifest-V3-blue) ![Engine](https://img.shields.io/badge/Engine-Stockfish%2018-green) ![Privacy](https://img.shields.io/badge/Analysis-100%25%20local-brightgreen)
+<p align="center">
+  Live move suggestions for chess.com and lichess.org, powered by a locally-run Stockfish 18 engine.
+  <br>
+  No accounts. No cloud. No data leaves the browser.
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Manifest-V3-blue" alt="Manifest V3">
+  <img src="https://img.shields.io/badge/Engine-Stockfish%2018-green" alt="Stockfish 18">
+  <img src="https://img.shields.io/badge/Analysis-100%25%20local-brightgreen" alt="Local analysis">
+  <img src="https://img.shields.io/badge/License-GPL--3.0-lightgrey" alt="GPL-3.0">
+</p>
 
 ---
 
-## ✨ Features
+## Overview
 
-| Feature | Details |
-|---|---|
-| 🔍 Live board reading | Site-specific DOM adapters for chess.com and lichess.org, all exposing `getFEN() / getMoveHistory() / getSideToMove() / isMyTurn()` |
-| ⚡ Real-time updates | `MutationObserver`-driven detection of new moves — no polling loops |
-| 🧠 Local grandmaster | Stockfish 18 (lite, NNUE neural-net eval) bundled as WASM, run in an offscreen-document Web Worker |
-| 🏹 On-board arrows | SVG overlay in the board's own coordinate system, up to 3 ranked candidate lines |
-| 📊 Eval panel | Move in SAN plus centipawn or mate score, shown only on your turn |
-| 🎛️ Popup settings | Per-site toggles, depth slider, 1–3 lines, eval on/off, max think-time cap |
-| 🛟 Graceful fallback | If the WASM engine is ever blocked, a built-in local search still returns legal moves |
+Chessatron is a Chrome/Edge/Brave extension (Manifest V3) that reads an in-progress game directly from the page DOM and overlays the engine's recommended move on the board in real time. Analysis is performed entirely on-device by Stockfish 18 compiled to WebAssembly.
 
----
+## Features
 
-## 🚀 Installation (load unpacked)
+- **Live board reading** — dedicated DOM adapters for chess.com and lichess.org behind a common interface (`getFEN`, `getMoveHistory`, `getSideToMove`, `isMyTurn`).
+- **Real-time updates** — board changes are detected with `MutationObserver`; suggestions refresh automatically on your turn.
+- **Local Stockfish 18** — bundled WASM build with NNUE neural-network evaluation, executed in an offscreen-document Web Worker.
+- **On-board move arrows** — SVG overlay in the board's coordinate system with support for 1–3 ranked candidate lines.
+- **Evaluation panel** — suggested move in standard algebraic notation with centipawn or mate score.
+- **Configurable** — per-site toggles, search depth, candidate count, evaluation display, and a hard per-move think-time cap.
+- **Offline fallback** — if the WASM engine is ever unavailable, a built-in local search still returns legal moves.
 
-1. **Vendor the engine** (one time — downloads ~7 MB into `engine/`):
+## Installation
+
+**Prerequisites:** a Chromium-based browser (Chrome, Edge, or Brave) and ~10 MB of disk space for the vendored engine.
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/rakesh0x/chessatron.git
+   cd chessatron
+   ```
+2. Vendor the engine (one-time download into `engine/`):
    ```sh
    sh engine/download-stockfish.sh
    ```
-2. Open `chrome://extensions` (or `edge://extensions` / `brave://extensions`).
-3. Enable **Developer mode** (top-right corner).
-4. Click **Load unpacked** and select this folder (the one containing `manifest.json`).
-5. Pin **Chess Move Advisor** to the toolbar.
+3. Open `chrome://extensions` (or `edge://extensions`, `brave://extensions`) and enable **Developer mode**.
+4. Click **Load unpacked** and select the repository folder (the one containing `manifest.json`).
+5. Pin **Chessatron** to the toolbar.
 
-> The engine files (`engine/stockfish.js`, `engine/stockfish.wasm`) are git-ignored on purpose — every install vendors its own copy with the script above.
-
----
-
-## 🎮 Usage
+## Usage
 
 1. Open a game on chess.com or lichess.org.
-2. Click the extension icon and confirm your site is enabled.
-3. When it's **your turn**, a green arrow appears on the board and a small panel shows e.g.:
+2. Open the Chessatron popup and confirm the site is enabled.
+3. When it is your turn, an arrow appears on the board and a panel displays the recommendation, for example:
    ```
    Top moves
    1. Nf3 (+0.35)
    ```
-4. Tune to taste (see Settings). For fast time controls, lower depth and think time.
 
----
+### Recommended settings
 
-## 🎛️ Settings
+| Time control | Depth | Max think | Notes |
+|---|---|---|---|
+| Blitz / Bullet | 10 | 1–2 s | Prioritizes speed; still far above human level |
+| Rapid (10 min) | 12 | 2–3 s | Balanced default |
+| Deep analysis | 20+ | 10 s | Use with unlimited time; slow but strongest |
 
-| Setting | Default | Effect |
+## Configuration reference
+
+| Setting | Default | Description |
 |---|---|---|
-| Enable on chess.com / lichess.org | on / on | Independent per-site kill switches |
+| Enable on chess.com | On | Master switch for chess.com pages |
+| Enable on lichess.org | On | Master switch for lichess.org pages |
 | Depth | 12 | Search-depth ceiling (5–25) |
-| Max think | 3 s | Hard time cap per move, sent as UCI `movetime` (1–10 s) |
-| Lines | 1 | Candidate moves shown and drawn (1–3) |
-| Show evaluation | on | SAN + score vs. move text only |
+| Max think | 3 s | Hard per-move time cap, enforced via UCI `movetime` (1–10 s) |
+| Lines | 1 | Candidate moves displayed and drawn (1–3) |
+| Show evaluation | On | Show score alongside the move, or move text only |
 
-Recommended presets: **Blitz** — depth 10, think 1–2 s · **Rapid** — depth 12, think 3 s · **Deep analysis** — depth 20+, think 10 s.
-
----
-
-## 🏗️ How it works
+## Architecture
 
 ```
 chess.com / lichess.org DOM
-        │  MutationObserver + site adapter (FEN/SAN/turn)
-        ▼
-content script ──ANALYZE {fen, depth, multiPV, maxTime}──▶ service worker
-        ▲                                                      │ offscreen doc
-        │                        Stockfish 18 WASM ◀── UCI ────┘ (Web Worker)
-        └── bestmove + scores ── SVG arrow + eval panel (your turn only)
+        |  MutationObserver + site adapter (FEN / history / side to move)
+        v
+content script --- ANALYZE { fen, depth, multiPV, maxTime } ---> service worker
+        ^                                                              |
+        |                          Stockfish 18 WASM <--- UCI ---- offscreen document
+        +---------------- bestmove + scores: SVG arrow + eval panel (own turn only)
 ```
 
-Key design decisions:
+Design notes:
 
-- **Offscreen document, not background worker** — MV3 service workers cannot spawn `new Worker()`, and page CSPs can block workers created from content scripts. The offscreen document is extension-owned, so Stockfish always starts.
-- **Engine warmup on load** — WASM compile plus a throwaway `go depth 10` happens at startup, so the first real move doesn't pay cold-start cost mid-game.
-- **Time-bounded search** — `movetime` caps guarantee an answer in seconds; depth acts as a ceiling.
-- **No external calls** — after vendoring, analysis is fully offline. Nothing leaves the browser.
+- **Offscreen engine host.** MV3 service workers cannot construct `Worker` instances, and strict page content-security policies can block workers created from content scripts. Hosting Stockfish in an extension-owned offscreen document avoids both problems.
+- **Startup warmup.** WASM compilation plus a throwaway search run at load, so the first real analysis does not pay cold-start latency mid-game.
+- **Time-bounded search.** The think-time cap guarantees a response within seconds; depth serves as a ceiling rather than a target.
+- **Local-only analysis path.** Once vendored, the engine requires no network access. No position data is transmitted anywhere.
 
----
-
-## 📁 Project structure
+## Project structure
 
 ```
-├── manifest.json                  MV3 manifest (activeTab, scripting, storage, offscreen)
-├── background/service-worker.js   Forwards ANALYZE → offscreen engine doc
-├── offscreen/                     Extension-owned Stockfish host (UCI, warmup, queue)
-├── content-scripts/
-│   ├── chesscom-adapter.js        chess.com DOM → FEN/history/turn
-│   ├── lichess-adapter.js         lichess.org DOM → FEN/history/turn
-│   ├── common.js                  Overlay, panel, settings helpers
-│   └── content.js                 Orchestrator + local-search fallback
-├── engine/
-│   ├── stockfish.js / .wasm       Vendored Stockfish 18 (git-ignored, see script)
-│   ├── download-stockfish.sh      One-command vendor script
-│   └── engine-worker-client.js    In-page UCI client (legacy/alternate path)
-├── popup/                         Settings UI + last-suggestion readout
-└── lib/chess.js                   Bundled move-legality / FEN / SAN library
+manifest.json                  MV3 manifest and permissions
+assets/                        Logo and extension icons
+background/service-worker.js   Message relay: content script to engine host
+offscreen/                     Extension-owned Stockfish host (UCI protocol, warmup, queue)
+content-scripts/
+  chesscom-adapter.js          chess.com DOM adapter
+  lichess-adapter.js           lichess.org DOM adapter
+  common.js                    Overlay, panel, and settings helpers
+  content.js                   Orchestrator, watchdog, and local-search fallback
+engine/
+  stockfish.js / stockfish.wasm  Vendored Stockfish 18 (git-ignored; see script)
+  download-stockfish.sh        One-command engine vendor script
+  engine-worker-client.js      In-page UCI client (alternate path)
+popup/                         Settings UI and last-suggestion readout
+lib/chess.js                   Bundled legality, FEN, and SAN library
 ```
 
----
+## Troubleshooting
 
-## 🩺 Troubleshooting
-
-| Symptom | Cause → fix |
+| Symptom | Resolution |
 |---|---|
-| `Extension context invalidated` in console | Reloaded extension with old script in tab → **hard-refresh** the game tab (`Cmd/Ctrl+Shift+R`) |
-| `Engine error: worker construction failed` (old versions) | Fixed by the offscreen architecture — reload the extension to pick it up |
-| Stuck on `Analyzing…` > ~15 s | Cold WASM start (one-time) or wedged engine → wait for the automatic basic-engine fallback, then check `brave/chrome://extensions` → Inspect views for red lines |
-| `(engine still thinking…)` never upgrades | Stockfish blocked in your browser → paste the `[CMA]` console line when reporting |
-| No arrow, panel says `Waiting for opponent…` | Working as intended — suggestions render on your turn only |
-| Wrong squares highlighted | Site changed its DOM → the adapter selectors need updating (see Contributing) |
+| `Extension context invalidated` in the console | The extension was reloaded while the tab held the old content script. Hard-refresh the game tab (`Cmd/Ctrl+Shift+R`). |
+| Panel stuck on `Analyzing...` | Cold WASM start (one-time, ~10 s) or a busy engine. The automatic fallback appears after the think-time window; check `chrome://extensions` → Inspect views for errors if it never resolves. |
+| `(engine still thinking...)` never upgrades | Stockfish is blocked in this browser profile. Open an issue with the `[CMA]` console lines. |
+| `Waiting for opponent...` permanently | Expected behavior — suggestions render only when it is your turn. |
+| Misaligned or missing arrows | The site likely changed its DOM. Adapter selectors in `content-scripts/*-adapter.js` need updating. |
 
----
+## Contributing
 
-## 🤝 Contributing
+1. Keep all site-specific selectors inside the adapter files, behind the shared interface.
+2. Validate with `node --check` on every JavaScript file touched.
+3. Test against a bot game on both supported sites before submitting.
+4. Do not introduce network calls into the analysis path — local-only operation is a core guarantee.
 
-1. Keep adapters isolated: all site-specific selectors live in `*-adapter.js`, behind the shared interface.
-2. Run `node --check` on every JS file you touch.
-3. Test on both sites (a bot game is the fastest harness).
-4. Never add network calls to the analysis path — local-only is a core guarantee.
+## Fair play and privacy
 
----
+- **Privacy.** No analytics, no accounts, no telemetry. Positions are evaluated in-process and never leave the machine.
+- **Fair play.** Engine assistance during rated games against human opponents violates the terms of chess.com and lichess.org and will result in account closure. Use Chessatron against bots, in casual or unrated games, for post-game review, or wherever assistance is explicitly permitted.
 
-## ⚖️ Fair play & privacy
+## License
 
-- **Privacy:** no analytics, no accounts, no data collection. Positions are analyzed in-process and never transmitted anywhere.
-- **Fair play:** engine assistance during rated games against humans violates chess.com's and lichess.org's terms and **will get your account banned**. Use this tool against bots, in casual/unrated games, for post-game review, or where assistance is explicitly allowed.
-
----
-
-## 📄 License
-
-GPL-3.0 — see [LICENSE](LICENSE). Stockfish itself is © the Stockfish team, GPLv3; the `stockfish.js` WASM build is © Nathan Rugg / Chess.com, GPLv3.
+GPL-3.0 — see [LICENSE](LICENSE). Stockfish is copyright the Stockfish team (GPLv3); the WebAssembly build is copyright Nathan Rugg / Chess.com, LLC (GPLv3).

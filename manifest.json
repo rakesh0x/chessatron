@@ -1,12 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Chess Move Advisor (Local Stockfish)",
+  "name": "Chessatron",
   "version": "1.1.0",
-  "description": "Reads live chess.com / lichess.org games from the DOM and suggests moves with a locally-run Stockfish WASM engine.",
+  "description": "Live move suggestions for chess.com and lichess.org, powered by locally-run Stockfish 18.",
   "permissions": ["activeTab", "scripting", "storage", "offscreen"],
   "host_permissions": ["*://*.chess.com/*", "*://*.lichess.org/*"],
   "background": { "service_worker": "background/service-worker.js" },
-  "action": { "default_popup": "popup/popup.html", "default_title": "Chess Move Advisor" },
+  "action": { "default_popup": "popup/popup.html", "default_title": "Chessatron", "default_icon": { "16": "assets/icon16.png", "48": "assets/icon48.png", "128": "assets/icon128.png" } },
+  "icons": { "16": "assets/icon16.png", "48": "assets/icon48.png", "128": "assets/icon128.png" },
   "content_scripts": [
     {
       "matches": ["*://*.chess.com/*", "*://*.lichess.org/*"],
